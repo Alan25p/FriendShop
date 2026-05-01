@@ -67,25 +67,25 @@ function ProductDetailComponent() {
   const hasSizes = product.has_sizes && product.sizes;
   const sizeNames = ['ECH', 'CH', 'M', 'G', 'EG'];
 
-  // 5. FUNCIÓN PARA AÑADIR Y DESCONTAR EN SUPABASE
+// 5. FUNCIÓN PARA AÑADIR Y DESCONTAR EN SUPABASE
   const handleAddToCart = async () => {
-    // 1. PRIMERO: Validamos si el usuario seleccionó una talla (es la prioridad de UX)
-    if (hasSizes && !selectedSize) {
-      toast.error("Selecciona una talla primero.");
-      return;
-    }
-
-    // 2. SEGUNDO: Validamos si está logueado para mostrar el modal de registro/login
+    // 1. BLOQUEO MAESTRO: Si no hay cuenta, le sacamos el modal y cortamos todo.
     if (!user) {
       setShowAuthModal(true);
       return;
     }
 
-    // 3. TERCERO: Si todo está bien, lo agregamos a la bolsa local
+    // 2. VALIDACIÓN DE TALLA: Ya sabemos que sí tiene cuenta, ahora le exigimos la talla.
+    if (hasSizes && !selectedSize) {
+      toast.error("Selecciona una talla primero.");
+      return;
+    }
+
+    // 3. TODO EN ORDEN: Añadimos a la bolsa local
     addToCart(product, selectedSize || undefined);
     setAdded(true);
 
-    // Lógica para descontar stock en Supabase
+    // 4. DESCONTAMOS EN SUPABASE
     if (hasSizes && selectedSize) {
       const currentStock = Number(product.sizes[selectedSize] || 0);
       
