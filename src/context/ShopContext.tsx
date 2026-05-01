@@ -4,6 +4,9 @@ import { useAuth } from './AuthContext';
 import { toast } from 'sonner';
 import { supabase } from "@/integrations/supabase/client";
 
+// IMPORTAMOS TU MODAL DE SEGURIDAD (Verifica que la ruta sea correcta)
+import { AuthRequiredModal } from '@/components/AuthRequiredModal';
+
 const MAX_QTY_PER_PRODUCT = 10;
 
 interface CartItem {
@@ -40,6 +43,9 @@ export function ShopProvider({ children }: { children: ReactNode }) {
   const [favorites, setFavorites] = useState<string[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [cartBounce, setCartBounce] = useState(false);
+  
+  // NUEVO ESTADO: Controla si el modal de login se muestra o no
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   // Cargar datos persistidos
   useEffect(() => {
@@ -66,7 +72,6 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     setFavorites(rawFavs ? JSON.parse(rawFavs) : []);
   }, [user, cartKey, favKey]);
 
-  // Persistencia en LocalStorage
   useEffect(() => {
     localStorage.setItem(cartKey, JSON.stringify(cart));
   }, [cart, cartKey]);
@@ -76,9 +81,9 @@ export function ShopProvider({ children }: { children: ReactNode }) {
   }, [favorites, favKey]);
 
   const addToCart = useCallback((product: Product, selectedSize?: string) => {
-    // CANDADO 1: Validar si hay usuario
+    // BLOQUEO VISUAL: Si no hay usuario, lanzamos el Modal y cortamos la función
     if (!user) {
-      toast.info("Inicia sesión para añadir a la bolsa.");
+      setShowAuthModal(true);
       return;
     }
 
@@ -108,29 +113,24 @@ export function ShopProvider({ children }: { children: ReactNode }) {
 
     setCartBounce(true);
     setTimeout(() => setCartBounce(false), 400);
-  }, [user]); // <- Agregamos 'user' a las dependencias
+  }, [user]); 
 
   const clearCart = useCallback(() => {
     setCart([]);
   }, []);
 
-  // --- REMOVE FROM CART: CON CORRECCIÓN DE TYPESCRIPT ---
   const removeFromCart = useCallback(async (productId: string, selectedSize?: string) => {
-    // 1. Identificamos el item antes de sacarlo
     const itemToRemove = cart.find(
       item => item.product.id === productId && item.selectedSize === selectedSize
     );
 
     if (itemToRemove) {
-      // 2. Actualizamos el carrito local
       setCart(prev => prev.filter(
         item => !(item.product.id === productId && item.selectedSize === selectedSize)
       ));
 
-      // 3. Devolvemos el stock a Supabase si aplica
       if (selectedSize) {
         try {
-          // Consultamos el stock actual (usamos 'as any' para evitar el error de never)
           const { data: productDB } = await (supabase.from('products') as any)
             .select('sizes')
             .eq('id', productId)
@@ -148,8 +148,6 @@ export function ShopProvider({ children }: { children: ReactNode }) {
               .eq('id', productId);
             
             toast.info(`Stock de talla ${selectedSize} restaurado.`);
-            
-            // Recarga pequeña para ver el botón habilitado de nuevo
             setTimeout(() => window.location.reload(), 500);
           }
         } catch (err) {
@@ -178,14 +176,14 @@ export function ShopProvider({ children }: { children: ReactNode }) {
   }, [removeFromCart]);
 
   const toggleFavorite = useCallback((productId: string) => {
-    // CANDADO 2: Validar si hay usuario
+    // BLOQUEO VISUAL: Igual para los favoritos
     if (!user) {
-      toast.info("Inicia sesión para guardar en favoritos.");
+      setShowAuthModal(true);
       return;
     }
 
     setFavorites(prev => prev.includes(productId) ? prev.filter(id => id !== productId) : [...prev, productId]);
-  }, [user]); // <- Agregamos 'user' a las dependencias
+  }, [user]); 
 
   const isFavorite = useCallback((productId: string) => favorites.includes(productId), [favorites]);
 
@@ -199,6 +197,8 @@ export function ShopProvider({ children }: { children: ReactNode }) {
       setIsCartOpen, cartBounce,
     }}>
       {children}
+      {/* RENDERIZAMOS EL MODAL AQUÍ PARA QUE FUNCIONE EN TODA LA TIENDA */}
+      <AuthRequiredModal open={showAuthModal} onClose={() => setShowAuthModal(false)} />
     </ShopContext.Provider>
   );
 }
