@@ -96,7 +96,7 @@ function ShippingModal({ open, onClose }: { open: boolean; onClose: () => void }
                   El costo varía según zona y peso. Para envíos fuera de Orizaba, llena tus datos al generar el mensaje de pedido.
                 </p>
                 <p className="text-[13px] font-medium text-foreground/80 leading-relaxed border-t border-foreground/5 pt-2">
-                  En caso de ser de Orizaba, el envío es únicamente en persona.
+                  En caso de ser de Orizaba o a sus alrededores, el envío es únicamente en persona.
                 </p>
               </div>
             </div>

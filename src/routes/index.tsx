@@ -23,7 +23,7 @@ function IndexComponent() {
       <section className="relative h-[80vh] flex items-center justify-center bg-zinc-50 overflow-hidden">
         <div className="absolute inset-0 opacity-10 bg-[url('https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=2070')] bg-cover bg-center" />
         <div className="container px-4 text-center z-10">
-          <h1 className="text-6xl md:text-8xl font-heading font-bold italic tracking-tighter text-foreground mb-6">
+          <h1 className="text-5xl sm:text-6xl md:text-8xl font-heading font-bold italic tracking-tighter text-foreground mb-6 px-4">
             FriendShop
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 font-light italic">
