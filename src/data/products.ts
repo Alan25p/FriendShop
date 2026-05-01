@@ -1,5 +1,8 @@
 // src/data/products.ts
-import type { Product } from '@/context/ProductsContext';
+// src/data/products.ts
+
+import type { Product } from '@/context/ProductsContext'; // 1. Lo traemos para usarlo aquí mismo
+export type { Product }; // 2. Lo exportamos para que la Navbar y otros lo vean
 
 // ==========================================
 // 1. DEFINICIONES DE CATEGORÍAS (TIPOS ESPECÍFICOS)

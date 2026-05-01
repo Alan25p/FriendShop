@@ -1,7 +1,10 @@
 import { FormEvent, useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-// Iconos necesarios para las nuevas funciones
-import { Trash2, Upload, X, Edit3, Package, LayoutDashboard, ShoppingBag, PlusCircle, CheckCircle, Truck, MapPin, Search, Calendar, ChevronRight } from "lucide-react";
+import { 
+  Trash2, Upload, X, Edit3, Package, LayoutDashboard, 
+  ShoppingBag, PlusCircle, CheckCircle, Truck, MapPin, 
+  Search, Calendar, ChevronRight, Tag 
+} from "lucide-react";
 import { useProducts } from "@/context/ProductsContext";
 import { womenProductTypes, menProductTypes, makeupTypes, shoeTypes, accessoryTypes } from "@/data/products";
 
@@ -45,10 +48,8 @@ export default function AdminProductsPage() {
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [editImages, setEditImages] = useState<File[]>([]);
   const [editLoading, setEditLoading] = useState(false);
-
   const [isLoading, setIsLoading] = useState(false);
 
-  // ESTADOS PARA BUSCADOR Y DASHBOARD
   const [searchTerm, setSearchTerm] = useState("");
   const [showOutStockOnly, setShowOutStockOnly] = useState(false);
   const [showMonthlyDetails, setShowMonthlyDetails] = useState(false);
@@ -84,8 +85,6 @@ export default function AdminProductsPage() {
     }
   }
 
-  // --- LÓGICA DE FILTRADO Y GANANCIAS ---
-  
   const getMonthlyEarnings = () => {
     const months: { [key: string]: number } = {};
     orders.forEach(order => {
@@ -270,7 +269,6 @@ export default function AdminProductsPage() {
       <section className="mx-auto max-w-7xl space-y-8">
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            {/* CORREGIDO: Color neutro para el tag de Panel Administrativo */}
             <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1">Panel Administrativo</p>
             <h1 className="text-4xl font-heading font-bold italic">FriendShop Dashboard</h1>
           </div>
@@ -282,7 +280,6 @@ export default function AdminProductsPage() {
           </div>
         </header>
 
-        {/* --- VISTA: DASHBOARD --- */}
         {tab === "dashboard" && (
           <div className="space-y-8 animate-fade-in">
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -310,7 +307,6 @@ export default function AdminProductsPage() {
             {showMonthlyDetails && (
               <div className="rounded-3xl border bg-card p-6 animate-fade-up">
                 <div className="flex items-center gap-2 mb-6">
-                  {/* Icono en color neutro */}
                   <Calendar className="text-muted-foreground" size={20} />
                   <h3 className="text-xl font-bold font-heading italic">Desglose de Ganancias</h3>
                 </div>
@@ -318,7 +314,6 @@ export default function AdminProductsPage() {
                   {getMonthlyEarnings().map(([month, total]) => (
                     <div key={month} className="p-4 rounded-2xl bg-muted/50 border border-border flex justify-between items-center">
                       <span className="text-xs font-bold uppercase text-muted-foreground">{month}</span>
-                      {/* CORREGIDO: Valor en color neutro de texto */}
                       <span className="text-lg font-bold text-foreground">${total.toLocaleString()}</span>
                     </div>
                   ))}
@@ -328,7 +323,6 @@ export default function AdminProductsPage() {
           </div>
         )}
 
-        {/* --- VISTA: INVENTARIO CON LUPA --- */}
         {tab === "products" && (
           <div className="space-y-6 animate-fade-in">
             <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-card p-4 rounded-3xl border shadow-sm">
@@ -379,16 +373,9 @@ export default function AdminProductsPage() {
                 </div>
               ))}
             </div>
-            {filteredProducts.length === 0 && (
-              <div className="text-center py-20 border-2 border-dashed rounded-3xl">
-                <Package className="mx-auto text-muted-foreground mb-2" size={40} />
-                <p className="text-muted-foreground">No se encontraron productos.</p>
-              </div>
-            )}
           </div>
         )}
 
-        {/* --- VISTA: TABLA DE PEDIDOS --- */}
         {tab === "orders" && (
            <div className="overflow-x-auto rounded-3xl border bg-card animate-fade-in">
               <table className="w-full text-left border-collapse min-w-[1000px]">
@@ -455,7 +442,6 @@ export default function AdminProductsPage() {
            </div>
         )}
 
-        {/* --- VISTA: CREAR PRODUCTO --- */}
         {tab === "create" && (
           <section className="mx-auto max-w-3xl rounded-3xl border bg-card p-8 shadow-sm animate-fade-up">
             <h2 className="text-2xl font-bold italic mb-6 font-heading">Crear Producto</h2>
@@ -463,18 +449,18 @@ export default function AdminProductsPage() {
               <div className="grid gap-6 md:grid-cols-2">
                 <div className="space-y-2">
                   <label className="text-xs font-bold uppercase ml-1">Nombre</label>
-                  <input placeholder="Ej: Vestido Gala" value={form.name} onChange={(e) => updateField("name", e.target.value)} className="w-full rounded-2xl border bg-background px-4 py-3 outline-none" />
+                  <input placeholder="Ej: Vestido Gala" value={form.name} onChange={(e) => updateField("name", e.target.value)} className="w-full rounded-2xl border bg-background px-4 py-3 outline-none focus:ring-2 focus:ring-primary/20 transition-all" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase ml-1">Precio ($)</label>
-                  <input type="number" placeholder="Ej: 50" value={form.price} onChange={(e) => updateField("price", e.target.value)} className="w-full rounded-2xl border bg-background px-4 py-3 outline-none" />
+                  <label className="text-xs font-bold uppercase ml-1">Precio Venta ($)</label>
+                  <input type="number" placeholder="Ej: 50" value={form.price} onChange={(e) => updateField("price", e.target.value)} className="w-full rounded-2xl border bg-background px-4 py-3 outline-none focus:ring-2 focus:ring-primary/20 transition-all font-bold" />
                 </div>
               </div>
 
               <div className="grid gap-6 md:grid-cols-2">
                 <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase ml-1">Precio Original ($)</label>
-                  <input type="number" placeholder="Opcional" value={form.originalPrice} onChange={(e) => updateField("originalPrice", e.target.value)} className="w-full rounded-2xl border bg-background px-4 py-3 outline-none" />
+                  <label className="text-xs font-bold uppercase ml-1">Precio Original / Descuento ($)</label>
+                  <input type="number" placeholder="Opcional" value={form.originalPrice} onChange={(e) => updateField("originalPrice", e.target.value)} className="w-full rounded-2xl border bg-zinc-50 px-4 py-3 outline-none focus:ring-2 focus:ring-primary/20 transition-all" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs font-bold uppercase ml-1">Género</label>
@@ -526,7 +512,7 @@ export default function AdminProductsPage() {
 
                 <div className="space-y-2">
                   <label className="text-xs font-bold uppercase ml-1">Inventario</label>
-                  <select value={form.stockStatus} onChange={(e) => updateField("stockStatus", e.target.value)} className="w-full rounded-2xl border bg-background px-4 py-3 h-[50px] text-sm">
+                  <select value={form.stockStatus} onChange={(e) => updateField("stockStatus", e.target.value)} className="w-full rounded-2xl border bg-background px-4 py-3 h-[50px] text-sm font-medium">
                     <option value="disponible">Disponible</option><option value="agotado_restock">Próximamente</option><option value="agotado">Agotado</option>
                   </select>
                 </div>
@@ -561,10 +547,18 @@ export default function AdminProductsPage() {
                   <Upload className="text-muted-foreground group-hover:text-primary" size={32} />
                   <p className="text-sm font-medium">Subir archivos</p>
                 </div>
+                {images.length > 0 && (
+                  <div className="mt-2 space-y-1">
+                    <p className="text-[10px] font-bold uppercase text-green-600">Archivos seleccionados:</p>
+                    {images.map((img, i) => (
+                      <p key={i} className="text-xs text-muted-foreground truncate italic">✓ {img.name}</p>
+                    ))}
+                  </div>
+                )}
                 <input type="file" ref={fileInputRef} multiple onChange={(e) => setImages(Array.from(e.target.files || []))} className="hidden" accept="image/*" />
               </div>
 
-              <button type="submit" disabled={isLoading} className="w-full py-4 rounded-2xl bg-primary text-primary-foreground font-bold shadow-lg">
+              <button type="submit" disabled={isLoading} className="w-full py-4 rounded-2xl bg-primary text-primary-foreground font-bold shadow-lg hover:opacity-90 transition-all active:scale-[0.98]">
                 {isLoading ? "CREANDO..." : "CREAR PRODUCTO"}
               </button>
             </form>
@@ -572,43 +566,55 @@ export default function AdminProductsPage() {
         )}
       </section>
 
-      {/* --- MODAL DE EDICIÓN --- */}
+      {/* --- MODAL DE EDICIÓN ACTUALIZADO CON DESCUENTO --- */}
       {editingProduct && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm overflow-y-auto">
-          <div className="w-full max-w-2xl rounded-3xl border bg-card p-6 md:p-8 space-y-6 shadow-2xl my-auto animate-scale-in">
-            <div className="flex justify-between items-center border-b pb-4">
-              <h2 className="text-2xl font-bold italic font-heading">Editar Artículo</h2>
-              <button onClick={() => setEditingProduct(null)} className="p-2 hover:bg-muted rounded-full transition-colors"><X /></button>
+          <div className="w-full max-w-2xl rounded-[32px] border bg-card p-6 md:p-10 space-y-8 shadow-2xl my-auto animate-scale-in">
+            <div className="flex justify-between items-center border-b border-zinc-100 pb-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-zinc-100 rounded-lg"><Edit3 size={18}/></div>
+                <h2 className="text-2xl font-bold italic font-heading">Editar Artículo</h2>
+              </div>
+              <button onClick={() => setEditingProduct(null)} className="p-2 hover:bg-zinc-100 rounded-full transition-colors"><X size={20}/></button>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2">
+            <div className="grid gap-8 md:grid-cols-2">
+              {/* GALERÍA EN EDICIÓN */}
               <div className="space-y-4">
-                <label className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">Galería</label>
+                <label className="text-[10px] font-bold uppercase text-muted-foreground tracking-[0.2em]">Galería del Producto</label>
                 <div className="grid grid-cols-3 gap-2">
                   {editingProduct.images?.map((url: string, i: number) => (
-                    <div key={i} className="relative group aspect-square rounded-xl overflow-hidden border bg-muted">
+                    <div key={i} className="relative group aspect-square rounded-xl overflow-hidden border border-zinc-100 bg-zinc-50">
                       <img src={url} className="h-full w-full object-cover" />
-                      <button onClick={() => setEditingProduct({...editingProduct, images: editingProduct.images.filter((_:any, idx:number) => idx !== i)})} className="absolute inset-0 bg-red-600/80 text-white opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all">
+                      <button 
+                        onClick={() => setEditingProduct({...editingProduct, images: editingProduct.images.filter((_:any, idx:number) => idx !== i)})} 
+                        className="absolute inset-0 bg-red-600/90 text-white opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all"
+                      >
                         <Trash2 size={16} />
                       </button>
                     </div>
                   ))}
-                  <button onClick={() => editFileInputRef.current?.click()} className="aspect-square rounded-xl border-2 border-dashed flex items-center justify-center text-muted-foreground hover:text-primary transition-all">
+                  <button onClick={() => editFileInputRef.current?.click()} className="aspect-square rounded-xl border-2 border-dashed border-zinc-200 flex items-center justify-center text-zinc-300 hover:text-primary hover:border-primary transition-all">
                     <PlusCircle size={24} />
                   </button>
                 </div>
                 <input type="file" ref={editFileInputRef} multiple className="hidden" onChange={(e) => setEditImages(Array.from(e.target.files || []))} />
               </div>
 
-              <div className="space-y-4">
-                <div className="space-y-1">
-                   <label className="text-[10px] font-bold uppercase">Nombre</label>
-                   <input value={editingProduct.name} onChange={(e) => setEditingProduct({...editingProduct, name: e.target.value})} className="w-full rounded-xl border bg-background px-4 py-2 text-sm font-medium" />
+              {/* CAMPOS DE TEXTO EN EDICIÓN */}
+              <div className="space-y-5">
+                <div className="space-y-1.5">
+                   <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Nombre del Producto</label>
+                   <input 
+                    value={editingProduct.name} 
+                    onChange={(e) => setEditingProduct({...editingProduct, name: e.target.value})} 
+                    className="w-full rounded-xl border border-zinc-100 bg-zinc-50/50 px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-primary/10 transition-all" 
+                   />
                 </div>
                 
-                <div className="grid grid-cols-2 gap-2">
-                   <div className="space-y-1">
-                      <label className="text-[10px] font-bold uppercase">Sección</label>
+                <div className="grid grid-cols-2 gap-3">
+                   <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Sección</label>
                       <select 
                         value={editingProduct.subcategory} 
                         onChange={(e) => {
@@ -619,7 +625,7 @@ export default function AdminProductsPage() {
                             product_type: newOptions.length > 0 ? newOptions[0].id : ""
                           });
                         }} 
-                        className="w-full rounded-xl border bg-background px-3 py-2 text-sm h-[40px]"
+                        className="w-full rounded-xl border border-zinc-100 bg-white px-3 py-2 text-xs font-bold h-[42px]"
                       >
                         {getSubcategoryOptions(editingProduct.category).map(sub => (
                           <option key={sub.id} value={sub.id}>{sub.label}</option>
@@ -627,12 +633,12 @@ export default function AdminProductsPage() {
                       </select>
                    </div>
                    
-                   <div className="space-y-1">
-                      <label className="text-[10px] font-bold uppercase">Tipo Prenda</label>
+                   <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Tipo</label>
                       <select 
                         value={editingProduct.product_type} 
                         onChange={(e) => setEditingProduct({...editingProduct, product_type: e.target.value})} 
-                        className="w-full rounded-xl border bg-background px-3 py-2 text-sm h-[40px]"
+                        className="w-full rounded-xl border border-zinc-100 bg-white px-3 py-2 text-xs font-bold h-[42px]"
                       >
                         {getProductTypeOptions(editingProduct.subcategory, editingProduct.category).map(t => (
                           <option key={t.id} value={t.id}>{t.label}</option>
@@ -641,39 +647,61 @@ export default function AdminProductsPage() {
                    </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2">
-                   <div className="space-y-1">
-                      <label className="text-[10px] font-bold uppercase">Precio ($)</label>
-                      <input type="number" value={editingProduct.price} onChange={(e) => setEditingProduct({...editingProduct, price: e.target.value})} className="w-full rounded-xl border bg-background px-4 py-2 text-sm font-bold" />
+                {/* NUEVO: PRECIO Y DESCUENTO EN EDICIÓN */}
+                <div className="grid grid-cols-2 gap-3 pt-2 border-t border-zinc-50 mt-2">
+                   <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Precio Venta ($)</label>
+                      <input 
+                        type="number" 
+                        value={editingProduct.price} 
+                        onChange={(e) => setEditingProduct({...editingProduct, price: e.target.value})} 
+                        className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-black text-zinc-900" 
+                      />
                    </div>
-                   <div className="space-y-1">
-                      <label className="text-[10px] font-bold uppercase">Estado</label>
-                      <select value={editingProduct.stock_status} onChange={(e) => setEditingProduct({...editingProduct, stock_status: e.target.value})} className="w-full rounded-xl border bg-background px-3 py-2 text-sm font-medium h-[40px]">
-                         <option value="disponible">Disponible</option>
-                         <option value="agotado_restock">Próximamente</option>
-                         <option value="agotado">Agotado</option>
-                      </select>
+                   <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Precio Orig. ($)</label>
+                      <input 
+                        type="number" 
+                        value={editingProduct.original_price || ''} 
+                        onChange={(e) => setEditingProduct({...editingProduct, original_price: e.target.value})} 
+                        className="w-full rounded-xl border border-zinc-100 bg-zinc-50 px-4 py-2 text-sm font-medium text-zinc-400" 
+                        placeholder="Opcional"
+                      />
                    </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Estado de Inventario</label>
+                  <select 
+                    value={editingProduct.stock_status} 
+                    onChange={(e) => setEditingProduct({...editingProduct, stock_status: e.target.value})} 
+                    className="w-full rounded-xl border border-zinc-100 bg-white px-3 py-2 text-xs font-bold h-[42px]"
+                  >
+                     <option value="disponible">✅ Disponible</option>
+                     <option value="agotado_restock">⏳ Próximamente</option>
+                     <option value="agotado">❌ Agotado</option>
+                  </select>
                 </div>
               </div>
             </div>
 
-            <div className="rounded-2xl border p-4 bg-muted/30 space-y-4">
+            {/* GESTIÓN DE TALLAS EN EDICIÓN */}
+            <div className="rounded-[24px] border border-zinc-100 p-5 bg-zinc-50/50 space-y-4">
                 <label className="flex items-center gap-3 cursor-pointer">
                   <input 
                     type="checkbox" 
                     checked={editingProduct.has_sizes || false} 
                     onChange={(e) => setEditingProduct({...editingProduct, has_sizes: e.target.checked})} 
-                    className="h-4 w-4 rounded border-gray-300 text-primary" 
+                    className="h-4 w-4 rounded border-zinc-300 text-zinc-900 focus:ring-0" 
                   />
-                  <span className="text-[10px] font-bold uppercase">Gestionar Tallas</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Gestionar Inventario de Tallas</span>
                 </label>
 
                 {editingProduct.has_sizes && (
-                  <div className="grid grid-cols-5 gap-2 bg-background p-3 rounded-xl border">
+                  <div className="grid grid-cols-5 gap-2 bg-white p-4 rounded-2xl border border-zinc-100 shadow-sm">
                     {["ECH", "CH", "M", "G", "EG"].map((size) => (
                       <div key={size}>
-                        <p className="text-[9px] font-bold uppercase mb-1 text-muted-foreground text-center">{size}</p>
+                        <p className="text-[9px] font-black uppercase mb-1.5 text-zinc-400 text-center">{size}</p>
                         <input 
                           type="number" 
                           min="0" 
@@ -683,7 +711,7 @@ export default function AdminProductsPage() {
                             ...editingProduct, 
                             sizes: { ...editingProduct.sizes, [size]: e.target.value }
                           })} 
-                          className="w-full rounded-lg border bg-background px-1 py-1.5 text-xs text-center font-medium" 
+                          className="w-full rounded-lg border border-zinc-100 bg-zinc-50 px-1 py-2 text-xs text-center font-bold focus:bg-white transition-all" 
                         />
                       </div>
                     ))}
@@ -691,16 +719,27 @@ export default function AdminProductsPage() {
                 )}
             </div>
 
-            <div className="space-y-1 pt-2 text-xs">
-               <label className="text-[10px] font-bold uppercase text-muted-foreground">Descripción</label>
-               <textarea value={editingProduct.description} onChange={(e) => setEditingProduct({...editingProduct, description: e.target.value})} className="w-full min-h-[100px] rounded-xl border bg-background px-4 py-2 resize-none" />
+            <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Descripción Corta</label>
+                <textarea 
+                  value={editingProduct.description} 
+                  onChange={(e) => setEditingProduct({...editingProduct, description: e.target.value})} 
+                  className="w-full min-h-[80px] rounded-2xl border border-zinc-100 bg-white px-4 py-3 text-sm resize-none focus:ring-2 focus:ring-primary/5 transition-all" 
+                />
             </div>
 
-            <div className="flex gap-4 pt-4 border-t">
-              <button onClick={saveProductChanges} disabled={editLoading} className="flex-[2] rounded-2xl bg-primary py-3.5 text-primary-foreground font-bold hover:opacity-90 transition-all shadow-lg">
-                {editLoading ? "GUARDANDO..." : "GUARDAR CAMBIOS"}
+            <div className="flex gap-4 pt-4 border-t border-zinc-50">
+              <button 
+                onClick={saveProductChanges} 
+                disabled={editLoading} 
+                className="flex-[2] rounded-2xl bg-zinc-900 py-4 text-white text-xs font-bold uppercase tracking-[0.2em] hover:bg-zinc-800 transition-all shadow-xl active:scale-95 disabled:opacity-50"
+              >
+                {editLoading ? "PROCESANDO..." : "GUARDAR CAMBIOS"}
               </button>
-              <button onClick={() => setEditingProduct(null)} className="flex-1 rounded-2xl border py-3.5 font-bold hover:bg-muted transition-all text-xs uppercase tracking-widest">
+              <button 
+                onClick={() => setEditingProduct(null)} 
+                className="flex-1 rounded-2xl border border-zinc-200 py-4 font-bold hover:bg-zinc-50 transition-all text-[10px] uppercase tracking-widest text-zinc-400"
+              >
                 Cancelar
               </button>
             </div>

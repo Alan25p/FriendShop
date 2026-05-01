@@ -43,8 +43,16 @@ const navLinks = [
 ];
 
 export function Navbar() {
+
   const { cartCount, setIsCartOpen, favorites, cartBounce } = useShop();
   const { user, signOut } = useAuth();
+
+  // NUEVO: Esto evita el error rojo de la consola
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => { setIsMounted(true); }, []);
+
+  // ... resto de tus estados ...
+  // ------------------------------------
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [favoritesOpen, setFavoritesOpen] = useState(false);
@@ -98,9 +106,8 @@ export function Navbar() {
           showNavbar ? 'translate-y-0' : '-translate-y-full'
         }`}
       >
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-width-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
-            {/* MOBILE MENU BUTTON */}
             <button
               className="lg:hidden p-2 -ml-2"
               onClick={() => setMobileOpen(!mobileOpen)}
@@ -108,7 +115,6 @@ export function Navbar() {
               {mobileOpen ? <X size={20} strokeWidth={1} /> : <Menu size={20} strokeWidth={1} />}
             </button>
 
-            {/* LOGO */}
             <Link to="/">
               <div className="leading-none">
                 <h1 className="font-heading text-2xl font-bold italic tracking-[0.15em]">
@@ -120,7 +126,6 @@ export function Navbar() {
               </div>
             </Link>
 
-            {/* DESKTOP NAV - ESTILO ZARA / MINIMAL */}
             <nav className="hidden lg:flex items-center gap-8">
               {navLinks.map((link) => (
                 <Link
@@ -134,8 +139,6 @@ export function Navbar() {
                       <span className={isActive ? "text-foreground" : "text-foreground/40 hover:text-foreground"}>
                         {link.label}
                       </span>
-                      
-                      {/* Marcador: Una línea negra de 1px muy fina que se desliza */}
                       {isActive && (
                         <motion.div
                           layoutId="nav-underline"
@@ -149,13 +152,11 @@ export function Navbar() {
               ))}
             </nav>
 
-            {/* ICONOS ESTILO BOUTIQUE (TOTAL BLACK) */}
             <div className="flex items-center gap-5">
               <button onClick={() => setSearchOpen(true)} className="hover:opacity-50 transition-opacity">
                 <Search size={18} strokeWidth={1.5} />
               </button>
 
-              {/* FAVORITOS - AHORA SOLO NEGRO */}
               <button
                 className="relative p-1"
                 onClick={() => protectedAction(() => setFavoritesOpen(true))}
@@ -168,18 +169,17 @@ export function Navbar() {
                   <Heart 
                     size={18} 
                     strokeWidth={1.5} 
-                    // CORRECCIÓN: fill-foreground text-foreground para que sea negro sólido
                     className={favorites.length > 0 ? "fill-foreground text-foreground" : ""} 
                   />
                 </motion.div>
-                {favorites.length > 0 && (
-                  <span className="absolute -top-1 -right-1 text-[9px] font-bold">
-                    ({favorites.length})
-                  </span>
-                )}
+                {/* Cambia la línea del span de favoritos por esta: */}
+                  {isMounted && favorites.length > 0 && (
+                    <span className="absolute -top-1 -right-1 text-[9px] font-bold">
+                      ({favorites.length})
+                    </span>
+                  )}
               </button>
 
-              {/* BOLSA */}
               <button
                 className="relative p-1"
                 onClick={() => protectedAction(() => setIsCartOpen(true))}
@@ -191,14 +191,14 @@ export function Navbar() {
                 >
                   <ShoppingBag size={18} strokeWidth={1.5} />
                 </motion.div>
-                {cartCount > 0 && (
+                {/* Cambia la línea del span del carrito por esta: */}
+                {isMounted && cartCount > 0 && (
                   <span className="absolute -top-1 -right-1 text-[9px] font-bold">
                     ({cartCount})
                   </span>
                 )}
               </button>
 
-              {/* USER MENU (REFINADO) */}
               {user ? (
                 <div className="relative hidden sm:block" ref={userMenuRef}>
                   <button
@@ -242,50 +242,64 @@ export function Navbar() {
           </div>
         </div>
 
-        {/* MOBILE MENU - CORREGIDO A MONOCROMO */}
         <AnimatePresence>
-          {mobileOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="lg:hidden border-t bg-background overflow-hidden"
+  {mobileOpen && (
+    <motion.div
+      initial={{ opacity: 0, height: 0 }}
+      animate={{ opacity: 1, height: 'auto' }}
+      exit={{ opacity: 0, height: 0 }}
+      className="lg:hidden border-t bg-background overflow-hidden"
+    >
+      <nav className="flex flex-col p-6 space-y-6">
+        {navLinks.map((link) => (
+          <Link
+            key={link.label}
+            to={link.to}
+            {...('params' in link ? { params: link.params } : {})}
+            onClick={() => setMobileOpen(false)}
+            className="text-xs uppercase tracking-[0.2em] font-bold text-foreground/60 hover:text-foreground transition-colors"
+          >
+            {link.label}
+          </Link>
+        ))}
+
+        {/* --- NUEVA SECCIÓN DE USUARIO EN MÓVIL --- */}
+        <div className="pt-6 border-t border-border space-y-6">
+          {user ? (
+            <>
+              <Link 
+                to="/cuenta" 
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center gap-3 text-xs uppercase tracking-[0.2em] font-bold text-zinc-500"
+              >
+                <User size={16} strokeWidth={1.5} /> Mi Cuenta
+              </Link>
+              <button 
+                onClick={() => {
+                  signOut();
+                  setMobileOpen(false);
+                }}
+                className="flex items-center gap-3 text-xs uppercase tracking-[0.2em] font-bold text-red-400"
+              >
+                <LogOut size={16} strokeWidth={1.5} /> Cerrar Sesión
+              </button>
+            </>
+          ) : (
+            <Link 
+              to="/login" 
+              onClick={() => setMobileOpen(false)}
+              className="flex items-center justify-center w-full py-4 bg-zinc-900 text-white rounded-xl text-[10px] uppercase tracking-[0.2em] font-bold shadow-lg"
             >
-              <nav className="flex flex-col p-4 space-y-4">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.label}
-                    to={link.to}
-                    {...('params' in link ? { params: link.params } : {})}
-                    onClick={() => setMobileOpen(false)}
-                    className="text-sm uppercase tracking-wide text-foreground hover:text-foreground/60 transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-                <div className="border-t pt-4 mt-2 space-y-3">
-                  {user ? (
-                    <>
-                      <Link to="/cuenta" onClick={() => setMobileOpen(false)} className="block text-sm uppercase tracking-wide">
-                        Mi cuenta
-                      </Link>
-                      <button onClick={() => { signOut(); setMobileOpen(false); }} className="block text-left text-sm uppercase tracking-wide">
-                        Cerrar sesión
-                      </button>
-                    </>
-                  ) : (
-                    <Link to="/login" onClick={() => setMobileOpen(false)} className="block text-sm uppercase tracking-wide">
-                      Iniciar sesión
-                    </Link>
-                  )}
-                </div>
-              </nav>
-            </motion.div>
+              Iniciar Sesión
+            </Link>
           )}
-        </AnimatePresence>
+        </div>
+      </nav>
+    </motion.div>
+  )}
+</AnimatePresence>
       </header>
 
-      {/* MODALS & DRAWERS */}
       <FavoritesDrawer
         open={favoritesOpen}
         onClose={() => setFavoritesOpen(false)}
