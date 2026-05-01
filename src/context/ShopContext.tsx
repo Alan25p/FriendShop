@@ -76,6 +76,12 @@ export function ShopProvider({ children }: { children: ReactNode }) {
   }, [favorites, favKey]);
 
   const addToCart = useCallback((product: Product, selectedSize?: string) => {
+    // CANDADO 1: Validar si hay usuario
+    if (!user) {
+      toast.info("Inicia sesión para añadir a la bolsa.");
+      return;
+    }
+
     if (product.stockStatus !== "disponible") {
       toast.error("Este producto no está disponible");
       return;
@@ -102,7 +108,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
 
     setCartBounce(true);
     setTimeout(() => setCartBounce(false), 400);
-  }, []);
+  }, [user]); // <- Agregamos 'user' a las dependencias
 
   const clearCart = useCallback(() => {
     setCart([]);
@@ -172,8 +178,14 @@ export function ShopProvider({ children }: { children: ReactNode }) {
   }, [removeFromCart]);
 
   const toggleFavorite = useCallback((productId: string) => {
+    // CANDADO 2: Validar si hay usuario
+    if (!user) {
+      toast.info("Inicia sesión para guardar en favoritos.");
+      return;
+    }
+
     setFavorites(prev => prev.includes(productId) ? prev.filter(id => id !== productId) : [...prev, productId]);
-  }, []);
+  }, [user]); // <- Agregamos 'user' a las dependencias
 
   const isFavorite = useCallback((productId: string) => favorites.includes(productId), [favorites]);
 
