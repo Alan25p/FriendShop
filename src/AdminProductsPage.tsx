@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { useProducts } from "@/context/ProductsContext";
 import { womenProductTypes, menProductTypes, makeupTypes, shoeTypes, accessoryTypes } from "@/data/products";
+import { toast } from "sonner";
 
 type Category = "women" | "men" | "unisex";
 type StockStatus = "disponible" | "agotado_restock" | "agotado";
@@ -121,7 +122,8 @@ export default function AdminProductsPage() {
     for (const image of fileList) {
       const ext = image.name.split(".").pop() || "jpg";
       const fileName = `${crypto.randomUUID()}.${ext}`;
-      await supabase.storage.from("products").upload(fileName, image);
+      const { error } = await supabase.storage.from("products").upload(fileName, image);
+      if (error) throw error;
       const { data } = supabase.storage.from("products").getPublicUrl(fileName);
       urls.push(data.publicUrl);
     }
@@ -176,7 +178,7 @@ export default function AdminProductsPage() {
       };
       const { error } = await (supabase as any).from("products").insert([productData]);
       if (error) throw error;
-      alert("Producto creado correctamente.");
+      toast.success("Producto creado correctamente.");
       resetForm();
       await loadProducts();      
       await refreshProducts();   
@@ -222,7 +224,7 @@ export default function AdminProductsPage() {
       setEditImages([]);
       await loadProducts();
       await refreshProducts();
-      alert("Cambios guardados con éxito.");
+      toast.success("Cambios guardados con éxito.");
     } catch (err: any) {
       alert("Error al actualizar: " + err.message);
     } finally {
@@ -467,7 +469,7 @@ export default function AdminProductsPage() {
                   <select 
                     value={form.category} 
                     onChange={(e) => {
-                      updateField("category", e.target.value);
+                      updateField("category", e.target.value as Category);
                       updateField("subcategory", "ropa"); 
                       const newOptions = getProductTypeOptions("ropa", e.target.value);
                       if (newOptions.length > 0) updateField("productType", newOptions[0].id);
@@ -512,7 +514,7 @@ export default function AdminProductsPage() {
 
                 <div className="space-y-2">
                   <label className="text-xs font-bold uppercase ml-1">Inventario</label>
-                  <select value={form.stockStatus} onChange={(e) => updateField("stockStatus", e.target.value)} className="w-full rounded-2xl border bg-background px-4 py-3 h-[50px] text-sm font-medium">
+                  <select value={form.stockStatus} onChange={(e) => updateField("stockStatus", e.target.value as StockStatus)} className="w-full rounded-2xl border bg-background px-4 py-3 h-[50px] text-sm font-medium">
                     <option value="disponible">Disponible</option><option value="agotado_restock">Próximamente</option><option value="agotado">Agotado</option>
                   </select>
                 </div>
@@ -566,7 +568,7 @@ export default function AdminProductsPage() {
         )}
       </section>
 
-      {/* --- MODAL DE EDICIÓN ACTUALIZADO CON DESCUENTO --- */}
+      {/* --- MODAL DE EDICIÓN --- */}
       {editingProduct && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm overflow-y-auto">
           <div className="w-full max-w-2xl rounded-[32px] border bg-card p-6 md:p-10 space-y-8 shadow-2xl my-auto animate-scale-in">
@@ -575,11 +577,10 @@ export default function AdminProductsPage() {
                 <div className="p-2 bg-zinc-100 rounded-lg"><Edit3 size={18}/></div>
                 <h2 className="text-2xl font-bold italic font-heading">Editar Artículo</h2>
               </div>
-              <button onClick={() => setEditingProduct(null)} className="p-2 hover:bg-zinc-100 rounded-full transition-colors"><X size={20}/></button>
+              <button onClick={() => { setEditingProduct(null); setEditImages([]); }} className="p-2 hover:bg-zinc-100 rounded-full transition-colors"><X size={20}/></button>
             </div>
 
             <div className="grid gap-8 md:grid-cols-2">
-              {/* GALERÍA EN EDICIÓN */}
               <div className="space-y-4">
                 <label className="text-[10px] font-bold uppercase text-muted-foreground tracking-[0.2em]">Galería del Producto</label>
                 <div className="grid grid-cols-3 gap-2">
@@ -594,22 +595,53 @@ export default function AdminProductsPage() {
                       </button>
                     </div>
                   ))}
-                  <button onClick={() => editFileInputRef.current?.click()} className="aspect-square rounded-xl border-2 border-dashed border-zinc-200 flex items-center justify-center text-zinc-300 hover:text-primary hover:border-primary transition-all">
+                  
+                  {/* PREVIEWS DE IMÁGENES NUEVAS */}
+                  {editImages.map((file, i) => (
+                    <div key={`new-${i}`} className="relative aspect-square rounded-xl overflow-hidden border-2 border-primary/30 bg-primary/5 group">
+                      <img src={URL.createObjectURL(file)} className="h-full w-full object-cover opacity-70" />
+                      <div className="absolute inset-0 flex flex-col items-center justify-center text-[8px] font-bold text-primary uppercase text-center p-1">
+                        <Upload size={12} className="mb-1" />
+                        Subiendo
+                      </div>
+                      <button 
+                        onClick={() => setEditImages(prev => prev.filter((_, idx) => idx !== i))}
+                        className="absolute top-1 right-1 bg-white rounded-full p-1 shadow-sm text-red-500"
+                      >
+                        <X size={10} />
+                      </button>
+                    </div>
+                  ))}
+
+                  <button 
+                    type="button"
+                    onClick={() => editFileInputRef.current?.click()} 
+                    className="aspect-square rounded-xl border-2 border-dashed border-zinc-200 flex items-center justify-center text-zinc-300 hover:text-primary hover:border-primary transition-all"
+                  >
                     <PlusCircle size={24} />
                   </button>
                 </div>
-                <input type="file" ref={editFileInputRef} multiple className="hidden" onChange={(e) => setEditImages(Array.from(e.target.files || []))} />
+                <input 
+                  type="file" 
+                  ref={editFileInputRef} 
+                  multiple 
+                  className="hidden" 
+                  accept="image/*"
+                  onChange={(e) => {
+                    const files = Array.from(e.target.files || []);
+                    setEditImages(prev => [...prev, ...files]);
+                  }} 
+                />
               </div>
 
-              {/* CAMPOS DE TEXTO EN EDICIÓN */}
               <div className="space-y-5">
                 <div className="space-y-1.5">
-                   <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Nombre del Producto</label>
-                   <input 
-                    value={editingProduct.name} 
-                    onChange={(e) => setEditingProduct({...editingProduct, name: e.target.value})} 
-                    className="w-full rounded-xl border border-zinc-100 bg-zinc-50/50 px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-primary/10 transition-all" 
-                   />
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Nombre del Producto</label>
+                    <input 
+                      value={editingProduct.name} 
+                      onChange={(e) => setEditingProduct({...editingProduct, name: e.target.value})} 
+                      className="w-full rounded-xl border border-zinc-100 bg-zinc-50/50 px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-primary/10 transition-all" 
+                    />
                 </div>
                 
                 <div className="grid grid-cols-2 gap-3">
@@ -647,7 +679,6 @@ export default function AdminProductsPage() {
                    </div>
                 </div>
 
-                {/* NUEVO: PRECIO Y DESCUENTO EN EDICIÓN */}
                 <div className="grid grid-cols-2 gap-3 pt-2 border-t border-zinc-50 mt-2">
                    <div className="space-y-1.5">
                       <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Precio Venta ($)</label>
@@ -685,7 +716,6 @@ export default function AdminProductsPage() {
               </div>
             </div>
 
-            {/* GESTIÓN DE TALLAS EN EDICIÓN */}
             <div className="rounded-[24px] border border-zinc-100 p-5 bg-zinc-50/50 space-y-4">
                 <label className="flex items-center gap-3 cursor-pointer">
                   <input 
@@ -737,7 +767,7 @@ export default function AdminProductsPage() {
                 {editLoading ? "PROCESANDO..." : "GUARDAR CAMBIOS"}
               </button>
               <button 
-                onClick={() => setEditingProduct(null)} 
+                onClick={() => { setEditingProduct(null); setEditImages([]); }} 
                 className="flex-1 rounded-2xl border border-zinc-200 py-4 font-bold hover:bg-zinc-50 transition-all text-[10px] uppercase tracking-widest text-zinc-400"
               >
                 Cancelar
