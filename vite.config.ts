@@ -5,6 +5,7 @@ import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { componentTagger } from "lovable-tagger";
+import { nitro } from "nitro/vite"; // <--- ESTA ES LA PIEZA CLAVE
 
 function devClientErrorLogger() {
   const VIRTUAL_ID = "virtual:dev-client-error-handler";
@@ -186,6 +187,7 @@ export default defineConfig(({ mode }) => {
       devClientErrorLogger(),
       devServerFnErrorLogger(),
       tanstackStart(),
+      nitro(), // <--- ADAPTADOR ACTIVADO
       viteReact(),
       mode === "development" && componentTagger(),
     ].filter(Boolean),
