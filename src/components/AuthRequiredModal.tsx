@@ -1,6 +1,6 @@
 import { X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link } from '@tanstack/react-router';
+import { Link, useLocation } from '@tanstack/react-router'; // <-- Importamos useLocation
 
 interface AuthRequiredModalProps {
   open: boolean;
@@ -8,6 +8,8 @@ interface AuthRequiredModalProps {
 }
 
 export function AuthRequiredModal({ open, onClose }: AuthRequiredModalProps) {
+  const location = useLocation(); // Obtenemos la URL actual (ej: /producto/playera-pro)
+
   return (
     <AnimatePresence>
       {open && (
@@ -24,8 +26,6 @@ export function AuthRequiredModal({ open, onClose }: AuthRequiredModalProps) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            // FIX: Centrado universal. 'w-[calc(100%-2rem)]' da márgenes a los lados en móvil.
-            // Se quitó el 'inset-4' para que la altura se ajuste automáticamente al contenido.
             className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100%-2rem)] max-w-sm bg-background rounded-[2rem] z-[60] overflow-hidden shadow-2xl p-8 text-center"
           >
             <button
@@ -35,7 +35,6 @@ export function AuthRequiredModal({ open, onClose }: AuthRequiredModalProps) {
               <X size={18} />
             </button>
 
-            {/* FIX: Se agregó 'mt-4' para separar el título del botón de cerrar y se aumentó el tamaño */}
             <h2 className="font-heading text-2xl font-bold italic text-foreground mb-2 mt-4">
               Inicia sesión
             </h2>
@@ -46,6 +45,8 @@ export function AuthRequiredModal({ open, onClose }: AuthRequiredModalProps) {
             <div className="flex flex-col gap-3">
               <Link
                 to="/login"
+                // FIX: Pasamos la ruta actual como parámetro 'redirect'
+                search={{ redirect: location.pathname }}
                 onClick={onClose}
                 className="w-full bg-foreground text-background py-3.5 rounded-2xl text-[10px] font-bold uppercase tracking-widest hover:scale-[0.98] transition-all block"
               >
@@ -53,6 +54,8 @@ export function AuthRequiredModal({ open, onClose }: AuthRequiredModalProps) {
               </Link>
               <Link
                 to="/registro"
+                // FIX: Lo mismo para el registro
+                search={{ redirect: location.pathname }}
                 onClick={onClose}
                 className="w-full border-2 border-border py-3.5 rounded-2xl text-[10px] font-bold uppercase tracking-widest text-foreground hover:bg-zinc-50 transition-all block"
               >

@@ -7,7 +7,8 @@ import type { Product } from '@/data/products';
 import { getProductBadge, getStockLabel } from '@/data/products';
 import { formatPrice } from '@/lib/format';
 import { AuthRequiredModal } from '@/components/AuthRequiredModal';
-import { Link } from '@tanstack/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
+import { toast } from 'sonner';
 
 interface ProductCardProps {
   product: Product;
@@ -16,26 +17,51 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, index = 0, onQuickView }: ProductCardProps) {
-  const { addToCart, toggleFavorite, isFavorite } = useShop();
+  const { addToCart, toggleFavorite, isFavorite, setShowAuthModal } = useShop(); // FIX: Usamos el modal global del ShopContext
   const { user } = useAuth();
+  const navigate = useNavigate(); // FIX: Necesario para redirigir
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const [authModal, setAuthModal] = useState(false);
   const favorited = isFavorite(product.id);
 
-  const guardedAction = (e: React.MouseEvent, action: () => void) => {
+  // --- LÓGICA DE AÑADIR A LA BOLSA (CANDADO DE TALLAS APLICADO) ---
+  const handleAddToCartClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!user) {
-      setAuthModal(true);
+
+    // 1. CANDADO DE TALLAS (La prioridad)
+    if (product.has_sizes) {
+      toast.info("Este producto requiere seleccionar una talla.");
+      // Redirigimos a la vista individual del producto
+      navigate({ to: `/producto/${product.id}` });
       return;
     }
-    action();
+
+    // 2. CANDADO DE USUARIO
+    if (!user) {
+      // Guardamos la intención por si acaso
+      localStorage.setItem('fs_pending_intent', JSON.stringify({ type: 'cart', product, size: undefined }));
+      setShowAuthModal(true); // Usamos el modal centralizado
+      return;
+    }
+
+    // 3. Añadir directo si no tiene tallas
+    addToCart(product);
   };
 
-  // FIX de los errores de Badge y Stock:
-  // Si tus funciones piden string, les pasamos el stockStatus.
-  // El "as any" es para que TypeScript no se ponga pesado con los tipos.
+  // --- LÓGICA DE FAVORITOS ---
+  const handleFavoriteClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!user) {
+      localStorage.setItem('fs_pending_intent', JSON.stringify({ type: 'fav', product: { id: product.id } }));
+      setShowAuthModal(true); // Usamos el modal centralizado
+      return;
+    }
+    toggleFavorite(product.id);
+  };
+
   const badge = getProductBadge(product as any); 
   const stockLabel = getStockLabel(product.stockStatus as any);
   const isOutOfStock = product.stockStatus !== 'disponible';
@@ -61,7 +87,6 @@ export function ProductCard({ product, index = 0, onQuickView }: ProductCardProp
             <div className="absolute inset-0 animate-pulse bg-muted" />
           )}
           
-          {/* Usamos "as any" en 'to' para que el Router no chille porque la ruta es nueva */}
           <Link to={"/producto/$productId" as any} params={{ productId: product.id } as any}>
             <img
               src={product.images[0]}
@@ -92,7 +117,8 @@ export function ProductCard({ product, index = 0, onQuickView }: ProductCardProp
             } max-lg:!opacity-100 max-lg:!translate-y-0`}
           >
             <button
-              onClick={(e) => !isOutOfStock && guardedAction(e, () => addToCart(product))}
+              // FIX: Reemplazado por la nueva función handleAddToCartClick
+              onClick={handleAddToCartClick}
               disabled={isOutOfStock}
               className={`flex-1 flex items-center justify-center gap-2 bg-background/95 backdrop-blur-sm text-foreground py-2.5 rounded-lg text-xs font-medium shadow-sm transition-colors duration-200 ${
                 isOutOfStock ? 'opacity-50 cursor-not-allowed' : 'hover:bg-background active:scale-95'
@@ -102,7 +128,6 @@ export function ProductCard({ product, index = 0, onQuickView }: ProductCardProp
               {isOutOfStock ? 'Agotado' : 'Agregar'}
             </button>
 
-            {/* BOTÓN DEL OJO: Ahora sí va a funcionar */}
             <Link
               to={"/producto/$productId" as any}
               params={{ productId: product.id } as any}
@@ -115,7 +140,8 @@ export function ProductCard({ product, index = 0, onQuickView }: ProductCardProp
           </div>
 
           <button
-            onClick={(e) => guardedAction(e, () => toggleFavorite(product.id))}
+            // FIX: Reemplazado por la nueva función handleFavoriteClick
+            onClick={handleFavoriteClick}
             className="absolute top-3 right-3 w-9 h-9 flex items-center justify-center rounded-full bg-background/80 backdrop-blur-sm transition-all duration-200 hover:bg-background shadow-sm z-30"
           >
             <Heart
@@ -141,7 +167,7 @@ export function ProductCard({ product, index = 0, onQuickView }: ProductCardProp
           </div>
         </div>
       </motion.div>
-      <AuthRequiredModal open={authModal} onClose={() => setAuthModal(false)} />
+      {/* Ya no renderizamos AuthRequiredModal aquí porque ya lo tenemos global en ShopContext */}
     </>
   );
 }

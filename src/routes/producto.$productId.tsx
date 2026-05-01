@@ -69,23 +69,29 @@ function ProductDetailComponent() {
 
 // 5. FUNCIÓN PARA AÑADIR Y DESCONTAR EN SUPABASE
   const handleAddToCart = async () => {
-    // 1. BLOQUEO MAESTRO: Si no hay cuenta, le sacamos el modal y cortamos todo.
+    // 1. PRIMERO: El bloqueo maestro. 
+    // Si no tiene cuenta, le sale el modal blanco de FRIENDSHOP y se frena todo.
     if (!user) {
       setShowAuthModal(true);
       return;
     }
 
-    // 2. VALIDACIÓN DE TALLA: Ya sabemos que sí tiene cuenta, ahora le exigimos la talla.
+    // 2. SEGUNDO: Validar la talla (Solo llega aquí si YA inició sesión).
     if (hasSizes && !selectedSize) {
+      // Usamos alert() porque tu toast.error parece estar invisible en pantalla.
+      // Esta ventana emergente nativa no fallará nunca.
+      alert("⚠️ Por favor, selecciona una talla primero.");
+      
+      // Dejamos el toast por si luego arreglas el componente visual
       toast.error("Selecciona una talla primero.");
       return;
     }
 
-    // 3. TODO EN ORDEN: Añadimos a la bolsa local
+    // 3. TERCERO: Si tiene cuenta y seleccionó talla, se añade a la bolsa.
     addToCart(product, selectedSize || undefined);
     setAdded(true);
 
-    // 4. DESCONTAMOS EN SUPABASE
+    // Lógica para descontar stock en Supabase
     if (hasSizes && selectedSize) {
       const currentStock = Number(product.sizes[selectedSize] || 0);
       
