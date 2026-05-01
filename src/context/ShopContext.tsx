@@ -29,6 +29,7 @@ interface ShopContextType {
   isCartOpen: boolean;
   setIsCartOpen: (open: boolean) => void;
   cartBounce: boolean;
+  setShowAuthModal: (show: boolean) => void; // <--- ESTA ES LA LÍNEA QUE FALTA
 }
 
 const ShopContext = createContext<ShopContextType | undefined>(undefined);
@@ -194,7 +195,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     <ShopContext.Provider value={{
       cart, favorites, addToCart, clearCart, removeFromCart, updateQuantity,
       toggleFavorite, isFavorite, cartCount, cartTotal, isCartOpen,
-      setIsCartOpen, cartBounce,
+      setIsCartOpen, cartBounce, setShowAuthModal // <--- SÓLO FALTABA AGREGARLO AQUÍ
     }}>
       {children}
       {/* RENDERIZAMOS EL MODAL AQUÍ PARA QUE FUNCIONE EN TODA LA TIENDA */}
@@ -202,7 +203,6 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     </ShopContext.Provider>
   );
 }
-
 export function useShop() {
   const context = useContext(ShopContext);
   if (!context) throw new Error('useShop must be used within ShopProvider');

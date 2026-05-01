@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useProducts } from "@/context/ProductsContext";
 import { useShop } from "@/context/ShopContext";
+import { useAuth } from "@/context/AuthContext"; // <- Importamos Auth para saber si hay usuario
 import { formatPrice } from "@/lib/format";
 import { getProductBadge, getStockLabel } from "@/data/products";
 import { ShoppingBag, ChevronLeft, Heart, Check, AlertCircle, ShieldCheck } from "lucide-react";
@@ -15,7 +16,12 @@ export const Route = createFileRoute("/producto/$productId")({
 function ProductDetailComponent() {
   const { productId } = Route.useParams();
   const { products } = useProducts();
-  const { addToCart, toggleFavorite, isFavorite } = useShop();
+  
+  // <- Extraemos user de AuthContext
+  const { user } = useAuth(); 
+  
+  // <- Agregamos setShowAuthModal del ShopContext
+  const { addToCart, toggleFavorite, isFavorite, setShowAuthModal } = useShop(); 
   
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [added, setAdded] = useState(false);
@@ -63,14 +69,23 @@ function ProductDetailComponent() {
 
   // 5. FUNCIÓN PARA AÑADIR Y DESCONTAR EN SUPABASE
   const handleAddToCart = async () => {
+    // 1. PRIMERO: Validamos si el usuario seleccionó una talla (es la prioridad de UX)
     if (hasSizes && !selectedSize) {
       toast.error("Selecciona una talla primero.");
       return;
     }
 
+    // 2. SEGUNDO: Validamos si está logueado para mostrar el modal de registro/login
+    if (!user) {
+      setShowAuthModal(true);
+      return;
+    }
+
+    // 3. TERCERO: Si todo está bien, lo agregamos a la bolsa local
     addToCart(product, selectedSize || undefined);
     setAdded(true);
 
+    // Lógica para descontar stock en Supabase
     if (hasSizes && selectedSize) {
       const currentStock = Number(product.sizes[selectedSize] || 0);
       
@@ -117,7 +132,14 @@ function ProductDetailComponent() {
                     className="w-full h-full object-contain p-4 transition-all duration-700"
                   />
                   <button 
-                    onClick={() => toggleFavorite(product.id)}
+                    onClick={() => {
+                      // Hacemos la misma validación para los Favoritos
+                      if (!user) {
+                        setShowAuthModal(true);
+                        return;
+                      }
+                      toggleFavorite(product.id);
+                    }}
                     className="absolute top-4 right-4 p-3 rounded-full bg-white/90 backdrop-blur-md shadow-sm active:scale-90 transition-all"
                   >
                     <Heart size={18} className={isFavorited ? "fill-primary text-primary" : "text-zinc-300"} />
