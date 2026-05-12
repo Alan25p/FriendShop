@@ -224,7 +224,7 @@ function ProductDetailComponent() {
               <div className="space-y-6">
                 <div className="space-y-3">
                   <div className="flex items-start gap-3 p-4 bg-red-50/50 rounded-2xl border border-red-100/50">
-                    <AlertCircle size={20} className="text-red-400 flex-shrink-0 mt-0.5" />
+                    <AlertCircle size={18} className="text-red-400 flex-shrink-0 mt-0.5" />
                     <p className="text-[9px] uppercase tracking-widest text-red-500/80 font-bold leading-relaxed">
                       No hay cambios ni devoluciones. Verifica tu talla antes de comprar.
                     </p>
