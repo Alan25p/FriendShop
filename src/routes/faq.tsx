@@ -16,8 +16,18 @@ export const Route = createFileRoute("/faq")({
 const faqs = [
   {
     question: "¿Cómo hago un pedido?",
-    answer:
-      "Agrega los productos que te gusten al carrito, haz clic en 'Solicitar pedido' y envíanos el mensaje generado por Instagram.",
+    // AHORA ESTO ES UN BLOQUE DE REACT (JSX) EN LUGAR DE UN TEXTO SIMPLE
+    answer: (
+      <div className="space-y-2">
+        <p>Es muy sencillo, solo sigue estos pasos:</p>
+        <ol className="list-decimal list-inside space-y-1.5 ml-1">
+          <li>Agrega tus productos favoritos al carrito.</li>
+          <li>Elige tu método de entrega (si es envío, llena los datos).</li>
+          <li>Haz clic en <span className="font-bold text-foreground">"Solicitar pedido"</span>.</li>
+          <li>¡Listo! Envíanos el mensaje automático por Instagram para confirmar tu compra.</li>
+        </ol>
+      </div>
+    ),
   },
   {
     question: "¿Cuáles son los métodos de pago?",
@@ -32,7 +42,7 @@ const faqs = [
   {
     question: "¿Cuándo se realizan las entregas?",
     answer:
-      "Las entregas se realizan únicamente los días sábado.",
+      "Las entregas de manera personal y depósito de paquete para envío se realizan únicamente los días sábado.",
   },
   {
     question: "¿Aceptan devoluciones?",
@@ -103,9 +113,10 @@ function FAQPage() {
               transition={{ duration: 0.25 }}
               className="overflow-hidden"
             >
-              <p className="px-5 pb-4 text-sm text-muted-foreground leading-relaxed">
+              {/* CAMBIAMOS LA ETIQUETA <p> POR <div> PARA QUE ACEPTE LAS LISTAS SIN DAR ERROR DE HTML */}
+              <div className="px-5 pb-4 text-sm text-muted-foreground leading-relaxed">
                 {faq.answer}
-              </p>
+              </div>
             </motion.div>
           </motion.div>
         ))}
