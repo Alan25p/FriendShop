@@ -215,7 +215,7 @@ function ProductDetailComponent() {
 
                 <div className="mb-8 pt-8 border-t border-zinc-50">
                   <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 mb-4">Descripción</h3>
-                  <p className="text-xs text-zinc-500 leading-relaxed font-light italic">
+                  <p className="text-xs md:text-sm lg:text-base text-zinc-500 leading-relaxed font-light italic">
                     {product.description || "Pieza curada bajo los estándares de FriendShop."}
                   </p>
                 </div>
