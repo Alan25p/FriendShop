@@ -5,6 +5,7 @@ import { useShop } from '@/context/ShopContext';
 import { useProducts } from '@/context/ProductsContext'; // NUEVO IMPORT
 import { formatPrice } from '@/lib/format';
 import { toast } from "sonner";
+import { Link } from '@tanstack/react-router'; // <-- AGREGAMOS EL LINK DE TU ENRUTADOR
 
 interface FavoritesDrawerProps {
   open: boolean;
@@ -111,13 +112,16 @@ export function FavoritesDrawer({ open, onClose, onQuickView }: FavoritesDrawerP
                         </div>
 
                         <div className="flex items-center gap-6">
-                          <button
-                            onClick={() => onQuickView?.(product)}
+                          {/* ACÁ ESTÁ LA MAGIA: CAMBIAMOS EL BOTÓN POR UN LINK */}
+                          <Link
+                            to="/producto/$productId"
+                            params={{ productId: product.id }}
+                            onClick={handleClose}
                             className="inline-flex items-center gap-2 text-[9px] font-bold uppercase tracking-widest border-b border-foreground/10 pb-0.5 hover:border-foreground"
                           >
                             <Eye size={12} strokeWidth={1.5} />
                             Detalles
-                          </button>
+                          </Link>
                           
                           <button
                             onClick={() => toggleFavorite(product.id)}
