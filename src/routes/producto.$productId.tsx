@@ -226,11 +226,11 @@ function ProductDetailComponent() {
                   <div className="flex items-start gap-3 p-4 bg-red-50/50 rounded-2xl border border-red-100/50">
                     <AlertCircle size={18} className="text-red-400 flex-shrink-0 mt-0.5" />
                     <p className="text-[9px] uppercase tracking-widest text-red-500/80 font-bold leading-relaxed">
-                      No hay cambios ni devoluciones. Verifica tu talla antes de comprar.
+                      No hay cambios ni devoluciones. Verifica tu producto y talla antes de comprar.
                     </p>
                   </div>
                   <div className="flex items-center gap-3 p-3.5 bg-green-50/50 rounded-2xl border border-green-100/50">
-                    <ShieldCheck size={14} className="text-green-500 flex-shrink-0" />
+                    <ShieldCheck size={18} className="text-green-500 flex-shrink-0" />
                     <p className="text-[9px] uppercase tracking-widest text-green-600 font-bold">
                       Entregas personales en Orizaba
                     </p>
