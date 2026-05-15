@@ -252,23 +252,23 @@ function CuentaPage() {
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-4 border-t border-border pt-4">
-              <button
-                onClick={() => signOut()}
-                className="inline-flex items-center gap-2 text-sm font-medium bg-secondary text-secondary-foreground px-4 py-2 rounded-xl hover:bg-secondary/80 transition-colors"
-              >
-                <LogOut size={16} />
-                Cerrar sesión
-              </button>
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 border-t border-border pt-4">
+  <button
+    onClick={() => signOut()}
+    className="inline-flex items-center justify-center sm:justify-start gap-2 text-sm font-medium bg-secondary text-secondary-foreground px-4 py-2 rounded-xl hover:bg-secondary/80 transition-colors w-full sm:w-auto"
+  >
+    <LogOut size={16} />
+    Cerrar sesión
+  </button>
 
-              <button
-                onClick={handleDeleteAccount}
-                className="inline-flex items-center gap-2 text-sm font-medium text-destructive hover:bg-destructive/10 px-4 py-2 rounded-xl transition-colors ml-auto"
-              >
-                <Trash2 size={16} />
-                Eliminar cuenta
-              </button>
-            </div>
+  <button
+    onClick={handleDeleteAccount}
+    className="inline-flex items-center justify-center sm:justify-start gap-2 text-sm font-medium text-destructive hover:bg-destructive/10 px-4 py-2 rounded-xl transition-colors sm:ml-auto w-full sm:w-auto"
+  >
+    <Trash2 size={16} />
+    Eliminar cuenta
+  </button>
+</div>
           </div>
 
           {/* Orders */}
